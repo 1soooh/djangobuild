@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: django
+  name: djangobuild
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: djangobuild
+  template:
+    metadata:
+      labels:
+        app: djangobuild
+    spec:
+      containers:
+        - name: djangobuild
+          image: wh123rus/my-django:latest
+          ports:
+            - containerPort: 8080
