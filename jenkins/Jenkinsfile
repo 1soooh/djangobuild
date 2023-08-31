@@ -61,7 +61,7 @@ pipeline {
 
     post {
         success {
-            script("Update Kubernetes Manifests") {
+            script {
                 git branch: 'main', url: "${GIT_REPO_OPS_URL}"
 
                 sh "sed -i 's|image:.*|image: ${DOCKER_IMAGE_NAME}/${DOCKER_IMAGE_NAME}:v${env.BUILD_NUMBER}|g' k8s/deployment.yaml"
