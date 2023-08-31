@@ -27,7 +27,9 @@ pipeline {
     environment {
         GIT_REPO_URL = 'https://github.com/wh123rus/djangobuild.git'
         GIT_REPO_OPS_URL = 'https://github.com/1soooh/djangobuild.git'
-        DOCKER_IMAGE_NAME = 'wh123rus/my-django'
+        GIT_USER_NAME = 'wh123rus'
+        GIT_USER_EMAIL = 'wh123rus@naver.com'
+        DOCKER_IMAGE_NAME = '/my-django'
     }
 
     stages {
@@ -51,8 +53,8 @@ pipeline {
                     script {
                         sh "executor --dockerfile=Dockerfile \
                         --context=dir://${env.WORKSPACE} \
-                        --destination=${DOCKER_IMAGE_NAME}:v${env.BUILD_NUMBER} \
-                        --destination=${DOCKER_IMAGE_NAME}:latest"
+                        --destination=${GIT_USER_NAME}${DOCKER_IMAGE_NAME}:v${env.BUILD_NUMBER} \
+                        --destination=${GIT_USER_NAME}${DOCKER_IMAGE_NAME}:latest"
                     }
                 }
             }
@@ -64,9 +66,11 @@ pipeline {
             script {
                 git branch: 'main', url: "${GIT_REPO_OPS_URL}"
 
-                sh "sed -i 's|image:.*|image: ${DOCKER_IMAGE_NAME}/${DOCKER_IMAGE_NAME}:v${env.BUILD_NUMBER}|g' k8s/deployment.yaml"
+                sh "sed -i 's|image:.*|image: ${GIT_USER_NAME}${DOCKER_IMAGE_NAME}/${GIT_USER_NAME}${DOCKER_IMAGE_NAME}:v${env.BUILD_NUMBER}|g' k8s/deployment.yaml"
 
                 sh 'git add k8s/deployment.yaml'
+                sh "git config --global user.email ${GIT_USER_EMAIL}"
+                sh "git config --global user.name ${GIT_USER_NAME}"
                 sh "git commit -m 'Jenkins Build Number - ${BUILD_NUMBER}'"
 
                 withCredentials([gitUsernamePassword(credentialsId: 'github')]) {
