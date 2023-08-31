@@ -1,0 +1,63 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: kaniko
+                image: gcr.io/kaniko-project/executor:debug
+                command: ['sleep']
+                args: ['infinity']
+                volumeMounts:
+                  - name: registry-credentials
+                    mountPath: /kaniko/.docker
+              volumes:
+                - name: registry-credentials
+                  secret:
+                    secretName: regcred
+                    items: 
+                    - key: .dockerconfigjson
+                      path: config.json
+            '''
+        }
+    }
+    
+    environment {
+        //DOCKER_HUB_CREDENTIALS = credentials('dockerhub') // Jenkins 자격 증명 시스템에서 가져온 자격 증명 ID
+        GIT_REPO_URL = 'https://github.com/wh123rus/djangobuild.git'
+        DOCKER_IMAGE_NAME = 'wh123rus/my-django'
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                script {
+                    withCredentials([gitUsernamePassword(credentialsId: 'github')]) {
+                        checkout([
+                            $class: 'GitSCM', 
+                            branches: [[name: '*/main']],
+                            userRemoteConfigs: [[url: "${GIT_REPO_URL}"]],
+                        ])
+                    }
+                    sh "pwd"
+                    sh "ls -la"
+                }
+            }
+        }
+
+        stage('Build and Tag Docker Image') {
+            steps {
+                container('kaniko') {
+                    script {
+                        sh "executor --dockerfile=Dockerfile \
+                        --context=dir://${env.WORKSPACE} \
+                        --destination=${DOCKER_IMAGE_NAME}:v${env.BUILD_NUMBER} \
+                        --destination=${DOCKER_IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+    }
+}

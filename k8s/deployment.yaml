@@ -17,4 +17,4 @@ spec:
         - name: djangobuild
           image: wh123rus/my-django:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 8000
