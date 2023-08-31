@@ -25,8 +25,8 @@ pipeline {
     }
     
     environment {
-        //DOCKER_HUB_CREDENTIALS = credentials('dockerhub') // Jenkins 자격 증명 시스템에서 가져온 자격 증명 ID
         GIT_REPO_URL = 'https://github.com/wh123rus/djangobuild.git'
+        GIT_REPO_OPS_URL = 'https://github.com/1soooh/djangobuild.git'
         DOCKER_IMAGE_NAME = 'wh123rus/my-django'
     }
 
@@ -54,6 +54,23 @@ pipeline {
                         --destination=${DOCKER_IMAGE_NAME}:v${env.BUILD_NUMBER} \
                         --destination=${DOCKER_IMAGE_NAME}:latest"
                     }
+                }
+            }
+        }
+
+        stage('Update Kubernetes Manifests') {
+            steps {
+                git branch: 'main', url: ${GIT_REPO_OPS_URL}
+
+                sh 'sed -i "s/image:.*/image: ${DOCKER_IMAGE_NAME}\\/${DOCKER_IMAGE_NAME}:v${env.BUILD_NUMBER}/g" k8s/deployment.yaml'
+
+                sh 'git add k8s/deployment.yaml'
+                /*sh 'git config --global user.name shin'
+                sh 'git config --global user.email hsshin0602@naver.com'*/
+                sh 'git commit -m "Jenkins Build Number - ${BUILD_NUMBER}"'
+
+                withCredentials([gitUsernamePassword(credentialsId: 'github')]) {
+                    sh 'git push origin main'
                 }
             }
         }
