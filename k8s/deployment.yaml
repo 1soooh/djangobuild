@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: djangobuild
-          image: wh123rus/my-django:v11
+          image: wh123rus/my-django:v13
           ports:
             - containerPort: 8000
