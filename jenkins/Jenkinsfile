@@ -27,7 +27,7 @@ pipeline {
     }
     
     environment {
-        GIT_REPO_URL = 'https://github.com/wh123rus/djangobuild.git'
+        GIT_REPO_URL = 'https://github.com/wh123rus/Minions_dev.git'
         GIT_REPO_OPS_URL = 'https://github.com/1soooh/djangobuild.git'
         GIT_USER_NAME = 'wh123rus'
         GIT_USER_EMAIL = 'wh123rus@naver.com'
