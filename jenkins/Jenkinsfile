@@ -40,7 +40,7 @@ pipeline {
                 script {
                     checkout([
                         $class: 'GitSCM', 
-                        branches: [[name: '*/main']],
+                        branches: [[name: '*/master']],
                         userRemoteConfigs: [[credentialsId: 'github', url: "${GIT_REPO_URL}"]],
                     ])
                     sh "pwd"
